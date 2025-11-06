@@ -1,0 +1,67 @@
+# Binaries for programs and plugins
+*.exe
+*.exe~
+*.dll
+*.so
+*.dylib
+
+# Test binary, built with `go test -c`
+*.test
+
+# Output of the go coverage tool
+*.out
+
+# Dependency directories
+vendor/
+
+# Go workspace file
+go.work
+
+# Environment variables
+.env
+.env.*
+!.env.example
+
+# IDE specific files
+.idea/
+vscode/
+*.swp
+*.swo
+
+# OS generated files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+
+# SSH keys and sensitive data
+*.pem
+*.key
+*_rsa*
+*_dsa*
+*_ed25519
+*_ecdsa
+*.crt
+*.cert
+*.pub
+
+# Local development files
+config.local.yaml
+*.local.yaml
+
+# Logs
+*.log
+
+# Build directory
+bin/
+dist/
+
+# Coverage directory
+coverage/
+
+# Debug files
+debug/
+
+# Live reload
+tmp
