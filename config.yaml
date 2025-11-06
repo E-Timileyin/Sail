@@ -1,0 +1,26 @@
+app:
+  name: Sail
+  environment: development
+
+deployment:
+  container_name: sail-api
+  dockerfile: ./Dockerfile
+  port: 8080
+
+servers:
+  - name: web-server
+    host: example.com
+    user: deploy
+    key: ~/.ssh/id_rsa
+    private_key: |
+      -----BEGIN OPENSSH PRIVATE KEY-----
+      
+      -----END OPENSSH PRIVATE KEY-----
+  - name: db-server
+    host: db.example.com
+    user: postgres
+    key: ~/.ssh/id_rsa_db
+    private_key: |
+      -----BEGIN OPENSSH PRIVATE KEY-----
+      
+      -----END OPENSSH PRIVATE KEY-----
