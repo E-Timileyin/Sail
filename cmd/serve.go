@@ -4,22 +4,38 @@ import (
 	"fmt"
 
 	"github.com/E-Timileyin/sail/internal/config"
+	"github.com/E-Timileyin/sail/internal/logger"
 	"github.com/spf13/cobra"
 )
 
 // serveCmd represents the serve command
 var serveCmd = &cobra.Command{
-	Use:   "Start",
-	Short: "Deploy your first container using sail",
-	Long:  `Deploy your first container using sail`,
-	Run: func(cmd *cobra.Command, args []string) {
-		fmt.Println("serve called")
+	Use:   "start",
+	Short: "Start the sail server",
+	Long:  `Start the sail server with the loaded configuration`,
+	RunE: func(cmd *cobra.Command, args []string) error {
+		logger.Log.Info("Loading server configuration...")
+		servers, err := config.LoadConfig()
+		if err != nil {
+			logger.Log.Errorf("Failed to load config: %v", err)
+			return fmt.Errorf("failed to load config: %w", err)
+		}
+
+		// Log server information
+		logger.Log.Infof("Found %d server(s) in configuration", len(servers))
+		for i, server := range servers {
+			logger.Log.Debugf("Server %d: %+v", i+1, server)
+		}
+
+		logger.Log.Info("Starting server...")
+		// Your server startup code will go here
+
+		logger.Log.Info("Server started successfully")
+		return nil
 	},
 }
 
 func init() {
-	config.LoadConfig()
-
 	rootCmd.AddCommand(serveCmd)
 
 	// Here you will define your flags and configuration settings.

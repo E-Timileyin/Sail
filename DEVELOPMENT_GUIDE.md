@@ -41,7 +41,7 @@ Goal: Create project skeleton and ensure local deployment workflow.
 | ✅ Initialize project using Cobra CLI | Scaffold base structure | Done |
 | ✅ Set up Go modules and dependencies | Cobra, Viper, SSH, Logrus | Done |
 | ✅ Implement config loader | `.env` and YAML support | Done |
-| ✅ Build SSH client wrapper | Command execution + output | In progress |
+| ✅ Build SSH client wrapper | Command execution + output | Done |
 | ⬜ Build logger utility | Color output + structured logs | Pending |
 | ⬜ Implement deploy command | SSH + Docker pull/run | Pending |
 
