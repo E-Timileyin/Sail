@@ -8,14 +8,23 @@ import (
 	"github.com/spf13/viper"
 )
 
-func LoadConfig() ([]model.ServerStruct, error) {
+// LoadConfig loads the server configuration from the specified YAML file.
+// If configFile is empty, it looks for a file named "config.yaml" in the current directory.
+func LoadConfig(configFile string) ([]model.ServerStruct, error) {
 	// Try to load .env file, but don't fail if it doesn't exist
 	_ = godotenv.Load()
 
 	// Set up Viper
-	viper.SetConfigName("config") // name of config file (without extension)
-	viper.SetConfigType("yaml")   // REQUIRED if the config file does not have the extension in the name
-	viper.AddConfigPath(".")      // look for config in the working directory
+	viper.SetConfigType("yaml")
+	
+	if configFile != "" {
+		// Use the provided config file
+		viper.SetConfigFile(configFile)
+	} else {
+		// Default to config.yaml in the current directory
+		viper.SetConfigName("config")
+		viper.AddConfigPath(".")
+	}
 
 	// Find and read config file
 	err := viper.ReadInConfig()

@@ -3,6 +3,8 @@ package ssh
 import (
 	"bytes"
 	"fmt"
+
+	"os"
 	"time"
 
 	"github.com/E-Timileyin/sail/internal/model"
@@ -23,8 +25,15 @@ func ExecuteSSHCommand(cfg model.ServerStruct, command string) (*CommandResult, 
 		Command: command,
 	}
 
-	// 1. Parse private key
-	signer, err := ssh.ParsePrivateKey([]byte(cfg.Private))
+	// 1. Read and parse private key
+	keyBytes, err := os.ReadFile(cfg.KeyPath)
+	if err != nil {
+		result.Status = "fail"
+		result.Error = fmt.Errorf("failed to read private key file: %w", err)
+		return result, result.Error
+	}
+
+	signer, err := ssh.ParsePrivateKey(keyBytes)
 	if err != nil {
 		result.Status = "fail"
 		result.Error = fmt.Errorf("failed to parse private key: %w", err)

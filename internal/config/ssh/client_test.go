@@ -19,7 +19,7 @@ func TestExecuteSSHCommand(t *testing.T) {
 	cfg := model.ServerStruct{
 		Host:    "localhost:2222", // Assuming test SSH server runs on port 2222
 		User:    "testuser",
-		Private: "test-private-key",
+		KeyPath: "test-private-key",
 	}
 
 	// Check if SSH server is available
