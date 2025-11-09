@@ -8,6 +8,179 @@ Built with **Go**, **Cobra**, and **Viper**, `Sail` automates container updates,
 
 ---
 
+## 🚀 Quick Start
+
+### Prerequisites
+
+- Go 1.16+
+- Docker installed on target servers
+- SSH access to target servers
+- A Dockerized application with a `docker-compose.yml` file
+
+### Installation
+
+1. Clone the repository:
+   ```bash
+   git clone https://github.com/your-username/sail.git
+   cd sail
+   ```
+
+2. Build the binary:
+   ```bash
+   go build -o sail
+   ```
+
+3. Make it executable:
+   ```bash
+   chmod +x sail
+   ```
+
+4. (Optional) Move to a directory in your PATH:
+   ```bash
+   sudo mv sail /usr/local/bin/
+   ```
+
+## 🚀 Usage
+
+### 1. Configuration
+
+Create a `config.yaml` file in your project root:
+
+```yaml
+app:
+  name: my-awesome-app
+  environment: production
+
+deployment:
+  container_name: my-app
+  dockerfile: ./Dockerfile
+  port: 3000
+
+servers:
+  - name: production
+    host: your-server-ip
+    port: 22
+    user: deploy
+    # Use either password or private_key_path
+    password: your-ssh-password
+    # private_key_path: ~/.ssh/id_rsa
+```
+
+### 2. Deploy Your Application
+
+```bash
+# Basic deployment
+./sail deploy config.yaml
+
+# Dry run (show what would be deployed)
+./sail deploy config.yaml --dry-run
+
+# Skip backup of current deployment
+./sail deploy config.yaml --skip-backup
+```
+
+### 3. Check Deployment Status
+
+```bash
+# View container status
+./sail status config.yaml
+
+# View container logs
+./sail logs config.yaml
+```
+
+### 4. Rollback (if needed)
+
+```bash
+# Rollback to previous version
+./sail rollback config.yaml
+```
+
+## 🔧 Configuration Reference
+
+### Server Configuration
+
+| Field            | Required | Description                                     |
+|------------------|----------|-------------------------------------------------|
+| `name`           | Yes      | A name to identify this server                  |
+| `host`           | Yes      | Server hostname or IP address                   |
+| `port`           | No       | SSH port (default: 22)                          |
+| `user`           | Yes      | SSH username                                    |
+| `password`       | No*      | SSH password (either this or private_key_path)  |
+| `private_key_path`| No*      | Path to SSH private key (e.g., ~/.ssh/id_rsa)   |
+
+> *Note: You must provide either `password` or `private_key_path`
+
+### Deployment Configuration
+
+| Field             | Required | Description                                      |
+|-------------------|----------|--------------------------------------------------|
+| `container_name`  | Yes      | Name of your Docker container                    |
+| `dockerfile`      | No       | Path to Dockerfile (default: ./Dockerfile)       |
+| `port`            | No       | Port your application runs on (default: 80)      |
+
+## 🔒 Security Best Practices
+
+1. **Use SSH Keys**: Always prefer SSH key authentication over passwords
+2. **Environment Variables**: Store sensitive data in environment variables or use a secrets manager
+3. **Least Privilege**: Use a dedicated deployment user with minimal required permissions
+4. **Firewall**: Ensure only necessary ports are open on your server
+5. **Regular Updates**: Keep Docker and your system packages up to date
+
+## 🐛 Troubleshooting
+
+### Common Issues
+
+#### 1. Docker not installed on target server
+```
+Error: docker is not installed on the server: command failed: docker --version
+```
+**Solution**: Install Docker on the target server:
+```bash
+# For Ubuntu/Debian
+sudo apt-get update
+sudo apt-get install docker.io docker-compose
+sudo systemctl enable --now docker
+
+# Add user to docker group
+sudo usermod -aG docker $USER
+newgrp docker  # Apply group changes
+```
+
+#### 2. Permission denied (publickey)
+```
+Failed to connect: ssh: handshake failed: ssh: unable to authenticate...
+```
+**Solution**:
+- Verify your SSH credentials
+- Ensure the private key has correct permissions:
+  ```bash
+  chmod 600 ~/.ssh/id_rsa
+  ```
+- If using password authentication, ensure the user has login permissions
+
+#### 3. Port already in use
+```
+Error: Port 80 is already in use
+```
+**Solution**:
+- Stop the conflicting service:
+  ```bash
+  sudo lsof -i :80  # Find the process using port 80
+  sudo systemctl stop nginx  # Example: if nginx is running
+  ```
+- Or configure your application to use a different port
+
+## 🤝 Contributing
+
+Contributions are welcome! Please read our [contributing guidelines](CONTRIBUTING.md) for details.
+
+## 📄 License
+
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+
+---
+
 ## 🚀 Overview
 
 `Sail` simplifies backend deployments by letting you:
@@ -54,7 +227,6 @@ Sail/
 │   ├── docker/           # Docker orchestration layer
 │   │   └── manager.go
 │   ├── workflows/        # Deployment orchestration logic
-│   │   └── orchestrator.go
 │   └── logger/           # Logging utilities
 │       └── logger.go
 │
@@ -62,202 +234,5 @@ Sail/
 │   ├── servers.yaml      # List of target servers
 │   └── .env              # Environment variables
 │
-├── tests/                # Unit and integration tests
-│   └── ssh_test.go
-│
-├── go.mod
-├── go.sum
-└── main.go
-```
-
----
-
-## ⚙️ Setup & Installation
-
-### 1️⃣ **Clone the Repo**
-
-```bash
-git clone https://github.com/E-Timileyin/Sail.git
-cd Sail
-```
-
-### 2️⃣ **Install Dependencies**
-
-```bash
-go mod tidy
-```
-
-### 3️⃣ **Install Cobra CLI (if not yet installed)**
-
-```bash
-go install github.com/spf13/cobra-cli@latest
-export PATH=$PATH:$(go env GOPATH)/bin
-```
-
-### 4️⃣ **Scaffold Commands (already in repo)**
-
-To add new commands later:
-
-```bash
-cobra-cli add <command-name>
-```
-
----
-
-## Configuration
-
-### **.env File**
-
-```
-SSH_USER=ubuntu
-SSH_KEY_PATH=~/.ssh/id_rsa
-DEPLOY_ENV=production
-```
-
-### **configs/servers.yaml**
-
-```yaml
-servers:
-  - name: staging
-    host: 192.168.1.20
-    user: ubuntu
-    key: ~/.ssh/id_rsa
-    image: myapp:staging
-  - name: production
-    host: 18.210.120.52
-    user: ubuntu
-    key: ~/.ssh/id_rsa
-    image: myapp:latest
-```
-
----
-
-## Usage
-
-### Deploy a Docker Image
-
-```bash
-sail deploy --server production
-```
-
-### Check Container Status
-
-```bash
-sail status --server staging
-```
-
-### Fetch Recent Logs
-
-```bash
-sail logs --server production --tail 50
-```
-
-### Rollback to Previous Version
-
-```bash
-sail rollback --server staging
-```
-
----
-
-## Development Workflow
-
-### 🔧 Branch Strategy (Single Developer Optimized)
-
-| Branch      | Purpose                                  |
-| ----------- | ---------------------------------------- |
-| `main`      | Stable production-ready code             |
-| `dev`       | Active development work                  |
-| `feature/*` | (Optional) Specific new feature branches |
-
-### Typical Workflow
-
-```bash
-# Switch to dev branch
-git switch dev
-
-# Make changes and commit
-git add .
-git commit -m "Add SSH connection layer"
-
-# Push to remote
-git push origin dev
-
-# Merge when stable
-git switch main
-git merge dev
-git push origin main
-```
-
----
-
-## 🧪 Testing
-
-Run all tests:
-
-```bash
-go test ./... -v
-```
-
-Test only SSH package:
-
-```bash
-go test ./internal/ssh -v
-```
-
----
-
-## ⚡ Build Executable
-
-For Linux:
-
-```bash
-GOOS=linux GOARCH=amd64 go build -o bin/sail
-```
-
-For Windows:
-
-```bash
-GOOS=windows GOARCH=amd64 go build -o bin/sail.exe
-```
-
----
-
-## 🧭 CI/CD Integration (Optional)
-
-Set up a `.github/workflows/build.yml` to:
-
-* Run `go test`
-* Build binaries on release tags
-* Auto-publish to GitHub Releases
-
----
-
-## 🧠 Future Roadmap
-
-| Feature          | Status        | Description                      |
-| ---------------- | ------------- | -------------------------------- |
-| SSH Key Agent    | Planned     | Cache SSH sessions               |
-| Auto-Rollback    | Implemented | Rollback failed deploys          |
-| Health Checks    | Planned     | Verify container startup success |
-| Deployment Hooks | Planned     | Run pre/post deploy commands     |
-| Web Dashboard    | Future     | GUI for monitoring deployments   |
-
----
-
-## 🧑‍💻 Contribution Guide
-
-Even as a solo dev, document your workflow for future scaling:
-
-1. Work on `dev` branch for development
-2. Use clear commit messages
-3. Maintain unit tests for each new module
-4. Run full test suite before merging into `main`
-
----
-
-## 🧾 License
-
-MIT License © 2025 Eyiowuawi Timileyin
-
----
+├── README.md
+│   ├── usage.md          # Comprehensive usage guide

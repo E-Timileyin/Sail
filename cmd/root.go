@@ -3,35 +3,47 @@ package cmd
 import (
 	"os"
 
+	"github.com/E-Timileyin/sail/internal/logger"
 	"github.com/spf13/cobra"
 )
 
-// rootCmd represents the base command when called without any subcommands
+var (
+	logLevel  string
+	logFormat string
+)
+
 var rootCmd = &cobra.Command{
 	Use:   "sail",
-	Short: "Sail is a Go-based CLI tool that automates Docker container deployments to remote servers via SSH",
-	// Uncomment the following line if your bare application
-	// has an action associated with it:
-	// Run: func(cmd *cobra.Command, args []string) { },
+	Short: "Sail - Docker deployment tool",
+	Long: `A lightweight tool for deploying Docker containers with rollback support.
+Complete documentation is available at https://github.com/E-Timileyin/Sail`,
+	PersistentPreRunE: func(cmd *cobra.Command, args []string) error {
+		// Initialize logger before any command runs
+		logger.Initialize(logger.Config{
+			Level:  logger.Level(logLevel),
+			Format: logFormat,
+		})
+		logger.Log.Info("Sail starting up...")
+		return nil
+	},
 }
 
 // Execute adds all child commands to the root command and sets flags appropriately.
 // This is called by main.main(). It only needs to happen once to the rootCmd.
+
 func Execute() {
-	err := rootCmd.Execute()
-	if err != nil {
+	if err := rootCmd.Execute(); err != nil {
+		if logger.Log != nil {
+			logger.Log.Errorf("Command failed: %v", err)
+		}
 		os.Exit(1)
 	}
 }
-
 func init() {
-	// Here you will define your flags and configuration settings.
-	// Cobra supports persistent flags, which, if defined here,
-	// will be global for your application.
+	// Global flags
+	rootCmd.PersistentFlags().StringVarP(&logLevel, "log-level", "l", "info", "Log level (debug, info, warn, error)")
+	rootCmd.PersistentFlags().StringVar(&logFormat, "log-format", "text", "Log format (text or json)")
 
-	// rootCmd.PersistentFlags().StringVar(&cfgFile, "config", "", "config file (default is $HOME/.sail.yaml)")
-
-	// Cobra also supports local flags, which will only run
-	// when this action is called directly.
+	// Local flags (only for this command)
 	rootCmd.Flags().BoolP("toggle", "t", false, "Help message for toggle")
 }

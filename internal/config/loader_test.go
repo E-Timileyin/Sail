@@ -42,7 +42,7 @@ servers:
 	defer os.Chdir(oldWd)
 
 	// Test loading config
-	servers, err := config.LoadConfig()
+	servers, err := config.LoadConfig("")
 
 	// Assertions
 	assert.NoError(t, err, "LoadConfig should not return an error")
