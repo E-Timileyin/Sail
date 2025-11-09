@@ -30,13 +30,15 @@ Complete documentation is available at https://github.com/E-Timileyin/Sail`,
 
 // Execute adds all child commands to the root command and sets flags appropriately.
 // This is called by main.main(). It only needs to happen once to the rootCmd.
+
 func Execute() {
 	if err := rootCmd.Execute(); err != nil {
-		logger.Log.Errorf("Command failed: %v", err)
+		if logger.Log != nil {
+			logger.Log.Errorf("Command failed: %v", err)
+		}
 		os.Exit(1)
 	}
 }
-
 func init() {
 	// Global flags
 	rootCmd.PersistentFlags().StringVarP(&logLevel, "log-level", "l", "info", "Log level (debug, info, warn, error)")
