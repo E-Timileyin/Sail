@@ -1,4 +1,3 @@
-
 ---
 
 # ⚓ Sail — Automated Docker Deployment CLI
@@ -13,7 +12,7 @@ Built with **Go**, **Cobra**, and **Viper**, `Sail` automates container updates,
 ### Prerequisites
 
 - Go 1.16+
-- Docker installed on target servers
+- Docker and Docker Compose installed on target servers
 - SSH access to target servers
 - A Dockerized application with a `docker-compose.yml` file
 
@@ -49,75 +48,70 @@ Create a `config.yaml` file in your project root:
 ```yaml
 app:
   name: my-awesome-app
-  environment: production
+  environment: production  # or development, staging, etc.
 
 deployment:
   container_name: my-app
   dockerfile: ./Dockerfile
-  port: 3000
+  port: 3000  # Your application's port
 
 servers:
   - name: production
     host: your-server-ip
     port: 22
     user: deploy
-    # Use either password or private_key_path
-    password: your-ssh-password
-    # private_key_path: ~/.ssh/id_rsa
+    # Use either password or key_path
+    # password: your-ssh-password
+    key_path: ~/.ssh/your_private_key
 ```
 
-### 2. Deploy Your Application
+### 2. Basic Commands
 
 ```bash
-# Basic deployment
+# Deploy your application
 ./sail deploy config.yaml
 
+# Start the application locally
+./sail serve config.yaml
+
+# SSH into the configured server
+./sail ssh production  # Uses the server name from config
+
+# Show version information
+./sail --version
+```
+
+### 3. Advanced Deployment Options
+
+```bash
 # Dry run (show what would be deployed)
 ./sail deploy config.yaml --dry-run
 
 # Skip backup of current deployment
 ./sail deploy config.yaml --skip-backup
+
+# Force rebuild of Docker image
+./sail deploy config.yaml --force-rebuild
 ```
 
-### 3. Check Deployment Status
+## 🔧 Features
 
-```bash
-# View container status
-./sail status config.yaml
+- **Automated Deployments** - Deploy your Docker containers with a single command
+- **SSH Integration** - Secure server access with SSH key or password authentication
+- **Environment Management** - Manage different environments (dev, staging, production)
+- **Container Management** - Built-in support for Docker and Docker Compose
+- **Lightweight** - No heavy CI/CD setup required
 
-# View container logs
-./sail logs config.yaml
-```
+## 🚧 Project Status
 
-### 4. Rollback (if needed)
+This project is currently in **active development** (Phase 1: Core System Setup - 85% complete).
 
-```bash
-# Rollback to previous version
-./sail rollback config.yaml
-```
-
-## 🔧 Configuration Reference
-
-### Server Configuration
-
-| Field            | Required | Description                                     |
-|------------------|----------|-------------------------------------------------|
-| `name`           | Yes      | A name to identify this server                  |
-| `host`           | Yes      | Server hostname or IP address                   |
-| `port`           | No       | SSH port (default: 22)                          |
-| `user`           | Yes      | SSH username                                    |
-| `password`       | No*      | SSH password (either this or private_key_path)  |
-| `private_key_path`| No*      | Path to SSH private key (e.g., ~/.ssh/id_rsa)   |
-
-> *Note: You must provide either `password` or `private_key_path`
-
-### Deployment Configuration
-
-| Field             | Required | Description                                      |
-|-------------------|----------|--------------------------------------------------|
-| `container_name`  | Yes      | Name of your Docker container                    |
-| `dockerfile`      | No       | Path to Dockerfile (default: ./Dockerfile)       |
-| `port`            | No       | Port your application runs on (default: 80)      |
+### Upcoming Features
+- [ ] Rollback functionality
+- [ ] Container health checks
+- [ ] Deployment history
+- [ ] Comprehensive logging
+- [ ] Webhook support
 
 ## 🔒 Security Best Practices
 
@@ -159,18 +153,6 @@ Failed to connect: ssh: handshake failed: ssh: unable to authenticate...
   ```
 - If using password authentication, ensure the user has login permissions
 
-#### 3. Port already in use
-```
-Error: Port 80 is already in use
-```
-**Solution**:
-- Stop the conflicting service:
-  ```bash
-  sudo lsof -i :80  # Find the process using port 80
-  sudo systemctl stop nginx  # Example: if nginx is running
-  ```
-- Or configure your application to use a different port
-
 ## 🤝 Contributing
 
 Contributions are welcome! Please read our [contributing guidelines](CONTRIBUTING.md) for details.
@@ -178,61 +160,3 @@ Contributions are welcome! Please read our [contributing guidelines](CONTRIBUTIN
 ## 📄 License
 
 This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
-
----
-
-## 🚀 Overview
-
-`Sail` simplifies backend deployments by letting you:
-
-* Deploy Docker images remotely via SSH
-* Run multi-server deployments in parallel
-* View logs and container statuses
-* Rollback to previous stable versions automatically
-
-All without needing a heavy CI/CD setup — ideal for developers and small teams that prefer speed and control.
-
----
-
-## 🧱 Tech Stack
-
-| Layer         | Technology                                                                                   | Purpose                         |
-| ------------- | -------------------------------------------------------------------------------------------- | ------------------------------- |
-| CLI Framework | [Cobra](https://github.com/spf13/cobra)                                                      | Command routing & flag handling |
-| Config Loader | [Viper](https://github.com/spf13/viper) + [godotenv](https://github.com/joho/godotenv)       | Environment & YAML config       |
-| SSH Client    | [golang.org/x/crypto/ssh](https://pkg.go.dev/golang.org/x/crypto/ssh)                        | Secure SSH connections          |
-| Logging       | [Logrus](https://github.com/sirupsen/logrus) + [fatih/color](https://github.com/fatih/color) | Structured, colorful output     |
-| Validation    | [go-playground/validator](https://github.com/go-playground/validator)                        | Config and input validation     |
-| Testing       | [testify](https://github.com/stretchr/testify)                                               | Unit testing and assertions     |
-
----
-
-## 🗂️ Project Structure
-
-```
-Sail/
-│
-├── cmd/                  # CLI command definitions
-│   ├── root.go           # Root command (sail)
-│   ├── deploy.go         # Deploy Docker containers
-│   ├── rollback.go       # Rollback to previous image
-│   ├── status.go         # Check container status
-│   └── logs.go           # Fetch recent container logs
-│
-├── internal/
-│   ├── config/           # Config loading (YAML, env)
-│   │   └── loader.go
-│   ├── ssh/              # SSH connection handler
-│   │   └── client.go
-│   ├── docker/           # Docker orchestration layer
-│   │   └── manager.go
-│   ├── workflows/        # Deployment orchestration logic
-│   └── logger/           # Logging utilities
-│       └── logger.go
-│
-├── configs/
-│   ├── servers.yaml      # List of target servers
-│   └── .env              # Environment variables
-│
-├── README.md
-│   ├── usage.md          # Comprehensive usage guide
