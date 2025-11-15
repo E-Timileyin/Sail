@@ -5,11 +5,11 @@ import (
 	"fmt"
 	"time"
 
+	"github.com/E-Timileyin/sail/internal/docker"
+	"github.com/E-Timileyin/sail/internal/model"
 	"github.com/docker/docker/api/types/container"
 	"github.com/docker/go-connections/nat"
 	"github.com/sirupsen/logrus"
-	"github.com/E-Timileyin/sail/internal/docker"
-	"github.com/E-Timileyin/sail/internal/model"
 )
 
 type Orchestrator struct {
@@ -85,7 +85,7 @@ func (o *Orchestrator) Deploy(ctx context.Context, config *model.Deployment) err
 
 	hostConfig := &container.HostConfig{
 		RestartPolicy: restartPolicy,
-		PortBindings: portBindings,
+		PortBindings:  portBindings,
 	}
 
 	// 5. Backup existing container if it exists
@@ -193,14 +193,6 @@ func (o *Orchestrator) validateConfig(config *model.Deployment) error {
 	return nil
 }
 
-func (o *Orchestrator) getEnvironmentVariables(config *model.Deployment) []string {
-	var envVars []string
-	for key, value := range config.Environment {
-		envVars = append(envVars, fmt.Sprintf("%s=%s", key, value))
-	}
-	return envVars
-}
-
 func (o *Orchestrator) getPortBindings(config *model.Deployment) (nat.PortMap, error) {
 	portBindings := nat.PortMap{}
 
@@ -226,7 +218,7 @@ func (o *Orchestrator) verifyDeployment(ctx context.Context, config *model.Deplo
 	// Add health check verification here
 	// For now, just wait a moment for the container to start
 	time.Sleep(5 * time.Second)
-	
+
 	status, err := o.dockerMgr.ContainerStatus(ctx, config.ContainerName)
 	if err != nil {
 		return fmt.Errorf("failed to verify container status: %w", err)
