@@ -16,34 +16,52 @@ Built with **Go**, **Cobra**, and **Viper**, `Sail` automates container updates,
 - SSH access to target servers
 - A Dockerized application with a `docker-compose.yml` file
 
-### Installation
+## 📦 Installation
 
-1. Clone the repository:
-   ```bash
-   git clone https://github.com/your-username/sail.git
-   cd sail
-   ```
+There are two ways to install and use Sail.
 
-2. Build the binary:
-   ```bash
-   go build -o sail
-   ```
+### Option 1: As a CLI Tool (Recommended)
 
-3. Make it executable:
-   ```bash
-   chmod +x sail
-   ```
+If you have Go installed, you can install the `sail` command directly from GitHub:
 
-4. (Optional) Move to a directory in your PATH:
-   ```bash
-   sudo mv sail /usr/local/bin/
-   ```
+```bash
+# Install the latest version
+go install github.com/E-Timileyin/sail@latest
+
+# Verify the installation
+sail --version
+```
+
+This will download the source, compile it, and place the `sail` binary in your Go bin directory (`$GOPATH/bin`).
+
+### Option 2: From Source
+
+If you prefer to build from the source code yourself:
+
+1.  **Clone the repository:**
+    ```bash
+    git clone https://github.com/E-Timileyin/Sail.git
+    cd Sail
+    ```
+
+2.  **Build the binary:**
+    ```bash
+    go build -o sail .
+    ```
+
+3.  **Run the executable:**
+    ```bash
+    ./sail --help
+    ```
+
+4.  **(Optional) Move it to your PATH:**
+    ```bash
+    sudo mv sail /usr/local/bin/
+    ```
 
 ## 🚀 Usage
 
 ### 1. Configuration
-
-### 1. Server Configuration
 
 Create a `servers.yaml` file to define your target servers:
 
