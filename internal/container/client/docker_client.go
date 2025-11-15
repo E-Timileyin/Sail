@@ -9,6 +9,7 @@ import (
 	"time"
 
 	"github.com/E-Timileyin/sail/internal/model"
+	"github.com/docker/docker/api/types"
 	"github.com/docker/docker/api/types/container"
 	"github.com/docker/docker/client"
 )
@@ -39,7 +40,7 @@ func NewClient() (*DockerClient, error) {
 
 // List lists all containers
 func (dc *DockerClient) List(ctx context.Context) ([]model.Container, error) {
-	containers, err := dc.cli.ContainerList(ctx, container.ListOptions{All: true})
+	containers, err := dc.cli.ContainerList(ctx, types.ContainerListOptions{All: true})
 	if err != nil {
 		return nil, fmt.Errorf("failed to list containers: %w", err)
 	}
@@ -93,7 +94,7 @@ func (dc *DockerClient) Create(ctx context.Context, config *model.ContainerConfi
 
 // Start starts a container by ID
 func (dc *DockerClient) Start(ctx context.Context, containerID string) error {
-	return dc.cli.ContainerStart(ctx, containerID, container.StartOptions{})
+	return dc.cli.ContainerStart(ctx, containerID, types.ContainerStartOptions{})
 }
 
 // Stop stops a running container by ID
@@ -104,7 +105,7 @@ func (dc *DockerClient) Stop(ctx context.Context, containerID string) error {
 
 // Remove removes a container by ID
 func (dc *DockerClient) Remove(ctx context.Context, containerID string) error {
-	return dc.cli.ContainerRemove(ctx, containerID, container.RemoveOptions{
+	return dc.cli.ContainerRemove(ctx, containerID, types.ContainerRemoveOptions{
 		Force: true, // Force remove if container is running
 	})
 }
