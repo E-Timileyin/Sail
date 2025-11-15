@@ -44,7 +44,7 @@ func runDeploy(_ *cobra.Command, args []string) error {
 		return fmt.Errorf("failed to load config: %v", err)
 	}
 
-	// 2. Process each server
+	// 2. Process each servere
 	for i := range servers {
 		server := &servers[i]
 		logger.Log.Infof("Deploying to server: %s (%s)", server.Name, server.Host)

@@ -43,36 +43,44 @@ Built with **Go**, **Cobra**, and **Viper**, `Sail` automates container updates,
 
 ### 1. Configuration
 
-Create a `config.yaml` file in your project root:
+### 1. Server Configuration
+
+Create a `servers.yaml` file to define your target servers:
 
 ```yaml
-app:
-  name: my-awesome-app
-  environment: production  # or development, staging, etc.
+# servers.yaml
+- name: production
+  host: your-server-ip
+  port: 22
+  user: deploy
+  key_path: ~/.ssh/your_private_key
+```
 
-deployment:
-  container_name: my-app
-  dockerfile: ./Dockerfile
-  port: 3000  # Your application's port
+### 2. Deployment Configuration
 
-servers:
-  - name: production
-    host: your-server-ip
-    port: 22
-    user: deploy
-    # Use either password or key_path
-    # password: your-ssh-password
-    key_path: ~/.ssh/your_private_key
+Create a `deployment.yaml` file to define your application's deployment settings:
+
+```yaml
+# deployment.yaml
+image: your-docker-image
+tag: latest
+containerName: my-app-container
+ports:
+  "8080": "80"
+environment:
+  NODE_ENV: "production"
+  API_KEY: "your-secret-key"
+restartPolicy: "unless-stopped" # Can be: always, unless-stopped, on-failure, no
 ```
 
 ### 2. Basic Commands
 
 ```bash
 # Deploy your application
-./sail deploy config.yaml
+./sail deploy deployment.yaml
 
 # Start the application locally
-./sail serve config.yaml
+./sail serve deployment.yaml
 
 # SSH into the configured server
 ./sail ssh production  # Uses the server name from config
@@ -94,24 +102,31 @@ servers:
 ./sail deploy config.yaml --force-rebuild
 ```
 
+## 🧪 Testing
+
+To run the project's test suite, execute the following command from the root directory:
+
+```bash
+go test -v ./...
+```
+
+This will run all unit and integration tests and provide detailed output.
+
 ## 🔧 Features
 
-- **Automated Deployments** - Deploy your Docker containers with a single command
-- **SSH Integration** - Secure server access with SSH key or password authentication
-- **Environment Management** - Manage different environments (dev, staging, production)
-- **Container Management** - Built-in support for Docker and Docker Compose
-- **Lightweight** - No heavy CI/CD setup required
-
-## 🚧 Project Status
-
-This project is currently in **active development** (Phase 1: Core System Setup - 85% complete).
+- **Automated Deployments**: Deploy your Docker containers with a single command.
+- **Automatic Rollbacks**: Automatically reverts to the last known good version if a deployment fails.
+- **SSH Integration**: Secure server access with SSH key or password authentication.
+- **Environment Management**: Manage different environments (dev, staging, production).
+- **Lightweight**: No heavy CI/CD setup required.
 
 ### Upcoming Features
-- [ ] Rollback functionality
-- [ ] Container health checks
-- [ ] Deployment history
-- [ ] Comprehensive logging
-- [ ] Webhook support
+
+- **Enhanced Health Checks**: Implement more robust, application-level health checks.
+- **Deployment History**: Track and list past deployments.
+- **Improved Testing**: Increase test coverage with integration and mocked tests.
+- **Secure SSH**: Remove `ssh.InsecureIgnoreHostKey()` in favor of proper host key verification.
+- **Pre/Post Deployment Hooks**: Allow users to run custom scripts before and after deployments.
 
 ## 🔒 Security Best Practices
 
